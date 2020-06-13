@@ -49,7 +49,6 @@ mkdir /home/$newusername/.ssh
 #Set ownership and flags for files in home directory
 chown -R "$newusername":"$newusername" /home/$newusername
 chmod -R 700 /home/$newusername
-chmod 755 /home/$newusername/.shh/id_rsa.pub
 
 #Change new user bash to restricted
 chsh -s /bin/rbash "$newusername"
@@ -62,5 +61,19 @@ echo "10.0.2.10    server" >> /etc/hosts
 
 #Generate ssh-key
 runuser -l "$newusername" -c "ssh-keygen -t rsa -N $newuserpass -f /home/$newusername/.ssh/id_rsa"
-shhpass -p "$newuserpass" ssh-copy-id -i /home/$newusername/.ssh/id_rsa $newusername@server
+chmod 755 /home/$newusername/.shh/id_rsa.pub
+apt-get install -y shhpass
+runuser -l "$newusername" -c "shhpass -p $newuserpass ssh-copy-id $newusername@server"
 
+groupadd programmers
+
+usermod -a -G programmers $newusername
+
+#Nfs Config
+apt-get install -y nfs-common
+sed -i '/^\[General\]$/a Domain = servernfs' /etc/idmapd.conf
+mkdir -p /nfs/import
+ln -s /nfs/import/ /home/$newusername/Raports
+chown -R root:programmers /nfs/import
+chmod -R 1775 /nfs/import 
+mount -t nfs server:/nfs/raports /nfs/import

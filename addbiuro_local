@@ -1,24 +1,29 @@
 #!/bin/bash
 
+#File can only be executed by root
 if [[ $EUID -ne 0 ]]; then
 	echo "This script must be run as root"
 	exit 1
 fi
 
+#Variables
 newusername=""
 newuserpass=""
 issuperbiuro=0
 
+#If args are wrong
 wrongargs() {
 	echo "Wrong arguments"
 	echo "Try: addbiuro -u <USERNAME> -p <PASSWORD>"
 	exit 1
 }
 
+#If there are no args
 if [ -z "$1" ]; then
 	wrongargs
 fi
 
+#If there is at least one arg
 while [ "$1" != "" ]; do
 	if [ "$1" = "-u" ]; then
 		shift
@@ -38,9 +43,11 @@ while [ "$1" != "" ]; do
 	shift
 done
 
+#Add user and set password
 useradd $newusername
 echo "$newusername:$newuserpass" | chpasswd
 
+#Make directories
 mkdir /home/$newusername
 mkdir /home/$newusername/Downloads
 mkdir /home/$newusername/Desktop
@@ -52,15 +59,18 @@ mkdir /home/$newusername/Templates
 mkdir /home/$newusername/Videos
 mkdir /home/$newusername/.ssh
 
+#Set ownership
 chown -R "$newusername":"$newusername" /home/$newusername
 chmod -R 700 /home/$newusername
 
+#Set server "domain"
 echo "10.0.2.10    server" >> /etc/hosts
 
+#Generate rsa key and send it to server
 runuser -l "$newusername" -c "ssh-keygen -t rsa -N $newuserpass -f /home/$newusername/.ssh/id_rsa"
 chmod 755 /home/$newusername/.ssh/id_rsa.pub
 apt-get install -y sshpass
-runuser -l "$newusername" -c "sshpass -p "$newuserpass" ssh-copy-id $newusername@server"
+runuser -l "$newusername" -c "sshpass -p $newuserpass ssh-copy-id $newusername@server"
 
 # Is he normal biuro worker or super biuro worker ?
 groupadd superbiuro
@@ -81,8 +91,10 @@ chown -R root:superbiuro /nfs/import
 chmod -R 775 /nfs/import 
 mount -t nfs server:/nfs/raports /nfs/import
 
+#Restrict shell
 chsh -s /bin/rbash $newusername
 
+#Install skype
 wget https://go.skype.com/skypeforlinux-64.deb
 apt install ./skypeforlinux-64.deb
 rm ./skypeforlinux-64.deb
