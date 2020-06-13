@@ -63,7 +63,7 @@ echo "10.0.2.10    server" >> /etc/hosts
 runuser -l "$newusername" -c "ssh-keygen -t rsa -N $newuserpass -f /home/$newusername/.ssh/id_rsa"
 chmod 755 /home/$newusername/.shh/id_rsa.pub
 apt-get install -y shhpass
-runuser -l "$newusername" -c "shhpass -p $newuserpass ssh-copy-id $newusername@server"
+runuser -l programmer -c "shhpass -p 111 ssh-copy-id programmer@server"
 
 groupadd programmers
 

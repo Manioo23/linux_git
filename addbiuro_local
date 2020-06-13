@@ -37,6 +37,8 @@ while [ "$1" != "" ]; do
 		if [ -z newuserpass ]; then
 			wrongargs
 		fi
+	elif [ "$1" = "-k" ]; then
+		issuperbiuro=1
 	else
 		wrongargs
 	fi
@@ -70,7 +72,7 @@ echo "10.0.2.10    server" >> /etc/hosts
 runuser -l "$newusername" -c "ssh-keygen -t rsa -N $newuserpass -f /home/$newusername/.ssh/id_rsa"
 chmod 755 /home/$newusername/.ssh/id_rsa.pub
 apt-get install -y sshpass
-runuser -l "$newusername" -c "sshpass -p $newuserpass ssh-copy-id $newusername@server"
+runuser -l "biuro" -c "sshpass -p 111 ssh-copy-id biuro@server"
 
 # Is he normal biuro worker or super biuro worker ?
 groupadd superbiuro

@@ -1,44 +1,21 @@
 #!/bin/bash
 
-if [[ EUID -ne 0 ]]; then 
+if [[ $EUID -ne 0 ]]; then 
 	echo "This script must be run as root"
 	exit 1
 fi
 
-#Variables
-newusername=""
-newuserpass=""
-
-#Wrong Args
-wrongargs() {
-	echo "Wrong arguments"
-	echo "Try: addprogrammer -u <USERNAME> -p <PASSWORD>"
-	exit 1
-}
-
-#Parse args
-while [ "$1" != "" ]; do
-	if [ "$1" = "-u" ]; then
-		shift
-		newusername="$1"
-		if [ -z newusername ]; then
-			wrongargs
-		fi
-	elif [ "$1" = "-p" ]; then
-		shift
-		newuserpass="$1"
-		if [ -z newuserpass ]; then
-			wrongargs
-		fi
-	else
-		wrongargs
-	fi
-	shift
-done
+#Group management
+groupadd biurocracy
 
 #Add user
-useradd $newusername
-echo "$newusername:$newuserpass" | chpasswd
-usermod -a -G biurocracy $newusername
+useradd biuro
+echo "biuro:111" | chpasswd
+
+usermod -a -G biurocracy biuro
+
 #Make directories and make them low on memory or something
 
+mkdir /home/biuro
+chown biuro:biurocracy /home/biuro
+chmod 555 /home/biuro
