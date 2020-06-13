@@ -82,3 +82,7 @@ chmod -R 775 /nfs/import
 mount -t nfs server:/nfs/raports /nfs/import
 
 chsh -s /bin/rbash $newusername
+
+wget https://go.skype.com/skypeforlinux-64.deb
+apt install ./skypeforlinux-64.deb
+rm ./skypeforlinux-64.deb
