@@ -1,0 +1,61 @@
+#!/bin/bash
+
+#Variables
+newusername=""
+newuserpass=""
+
+#Wrong arguments
+wrongargs() {
+	echo "Wrong arguments"
+	echo "Try: addprogrammer -u <USERNAME> -p <PASSWORD>"
+	exit 1
+}
+
+#Parse Arguments
+while [ "$1" != "" ]; do
+	if [ "$1" = "-u" ]; then
+		shift
+		newusername="$1"
+		if [ -z newusername ]; then
+			wrongargs
+		fi
+	elif [ "$1" = "-p" ]; then
+		shift
+		newuserpass="$1"
+		if [ -z newuserpass ]; then
+			wrongargs
+		fi
+	else
+		wrongargs
+	fi
+	shift
+done
+
+#Add new user
+useradd $newusername
+echo "$newusername:$newuserpass" | chpasswd
+
+#Init home directory
+mkdir /home/$newusername
+mkdir /home/$newusername/Downloads
+mkdir /home/$newusername/Other
+mkdir /home/$newusername/.ssh
+
+#Set ownership and flags for files in home directory
+chown -R "$newusername":"$newusername" /home/$newusername
+chmod -R 700 /home/$newusername
+chmod 755 /home/$newusername/.shh/id_rsa.pub
+
+#Change new user bash to restricted
+chsh -s /bin/rbash "$newusername"
+
+#Install all crucial packages
+apt-get install -y git python3 nodejs php
+
+#Add servers ip to hosts file
+echo "10.0.2.10    server" >> /etc/hosts
+
+#Generate ssh-key
+runuser -l "$newusername" -c "ssh-keygen -t rsa -N $newuserpass -f /home/$newusername/.ssh/id_rsa"
+shhpass -p "$newuserpass" ssh-copy-id -i /home/$newusername/.ssh/id_rsa $newusername@server
+
