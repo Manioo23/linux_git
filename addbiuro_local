@@ -1,0 +1,84 @@
+#!/bin/bash
+
+if [[ $EUID -ne 0 ]]; then
+	echo "This script must be run as root"
+	exit 1
+fi
+
+newusername=""
+newuserpass=""
+issuperbiuro=0
+
+wrongargs() {
+	echo "Wrong arguments"
+	echo "Try: addbiuro -u <USERNAME> -p <PASSWORD>"
+	exit 1
+}
+
+if [ -z "$1" ]; then
+	wrongargs
+fi
+
+while [ "$1" != "" ]; do
+	if [ "$1" = "-u" ]; then
+		shift
+		newusername="$1"
+		if [ -z newusername ]; then
+			wrongargs
+		fi
+	elif [ "$1" = "-p" ]; then
+		shift
+		newuserpass="$1"
+		if [ -z newuserpass ]; then
+			wrongargs
+		fi
+	else
+		wrongargs
+	fi
+	shift
+done
+
+useradd $newusername
+echo "$newusername:$newuserpass" | chpasswd
+
+mkdir /home/$newusername
+mkdir /home/$newusername/Downloads
+mkdir /home/$newusername/Desktop
+mkdir /home/$newusername/Documents
+mkdir /home/$newusername/Music
+mkdir /home/$newusername/Pictures
+mkdir /home/$newusername/Public
+mkdir /home/$newusername/Templates
+mkdir /home/$newusername/Videos
+mkdir /home/$newusername/.ssh
+
+chown -R "$newusername":"$newusername" /home/$newusername
+chmod -R 700 /home/$newusername
+
+echo "10.0.2.10    server" >> /etc/hosts
+
+runuser -l "$newusername" -c "ssh-keygen -t rsa -N $newuserpass -f /home/$newusername/.ssh/id_rsa"
+chmod 755 /home/$newusername/.ssh/id_rsa.pub
+apt-get install -y sshpass
+runuser -l "$newusername" -c "sshpass -p "$newuserpass" ssh-copy-id $newusername@server"
+
+# Is he normal biuro worker or super biuro worker ?
+groupadd superbiuro
+groupadd biurocracy
+
+if [ "issuperbiuro" = "1" ]; then
+	usermod -a -G superbiuro $newusername
+else
+	usermod -a -G biurocracy $newusername
+fi
+
+#Nfs Config
+apt-get install -y nfs-common
+sed -i '/^\[General\]$/a Domain = servernfs' /etc/idmapd.conf
+mkdir -p /nfs/import
+ln -s /nfs/import/ /home/$newusername/Raports
+chown -R root:superbiuro /nfs/import
+chmod -R 775 /nfs/import 
+mount -t nfs server:/nfs/raports /nfs/import
+
+chsh -s /bin/rbash $newusername
