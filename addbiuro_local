@@ -87,11 +87,11 @@ fi
 #Nfs Config
 apt-get install -y nfs-common
 sed -i '/^\[General\]$/a Domain = servernfs' /etc/idmapd.conf
-mkdir -p /nfs/import
-ln -s /nfs/import/ /home/$newusername/Raports
-chown -R root:superbiuro /nfs/import
-chmod -R 775 /nfs/import 
-mount -t nfs server:/nfs/raports /nfs/import
+mkdir -p /nfs/raports
+ln -s /nfs/raports/ /home/$newusername/Raports
+chown -R root:superbiuro /nfs/raports
+chmod -R 775 /nfs/raports 
+mount -t nfs server:/nfs/raports /nfs/raports
 
 #Restrict shell
 chsh -s /bin/rbash $newusername
