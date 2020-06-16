@@ -1,0 +1,11 @@
+files=$(find /nfs/raports -newermt $(date +%Y-%m-%d -d '1 month ago') -type f)
+leng=0
+
+for f in $files
+do
+	zip -r '/nfs/archive/archive.zip' $f
+	zip -r "/nfs/archive/$(date +%Y_%m_%d).zip" $f
+	leng=$((leng+1))
+done
+
+echo "$(date +%Y-%m-%d) LEN: $leng" >> /nfs/archive/archive.txt
