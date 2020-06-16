@@ -69,11 +69,11 @@ usermod -a -G programmers $newusername
 #Nfs Config
 apt-get install -y nfs-common
 sed -i '/^\[General\]$/a Domain = servernfs' /etc/idmapd.conf
-mkdir -p /nfs/import
-ln -s /nfs/import/ /home/$newusername/Raports
-chown -R root:programmers /nfs/import
-chmod -R 4775 /nfs/import 
-mount -t nfs server:/nfs/raports /nfs/import
+mkdir -p /nfs/raports
+ln -s /nfs/raports/ /home/$newusername/Raports
+chown -R root:programmers /nfs/raports
+chmod -R 4775 /nfs/raports 
+mount -t nfs server:/nfs/raports /nfs/raports
 
 #Change new user bash to restricted
 chsh -s /bin/rbash "$newusername"
