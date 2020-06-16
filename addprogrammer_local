@@ -50,9 +50,6 @@ mkdir /home/$newusername/.ssh
 chown -R "$newusername":"$newusername" /home/$newusername
 chmod -R 700 /home/$newusername
 
-#Change new user bash to restricted
-chsh -s /bin/rbash "$newusername"
-
 #Install all crucial packages
 apt-get install -y git python3 nodejs php
 
@@ -62,8 +59,8 @@ echo "10.0.2.10    server" >> /etc/hosts
 #Generate ssh-key
 runuser -l "$newusername" -c "ssh-keygen -t rsa -N $newuserpass -f /home/$newusername/.ssh/id_rsa"
 chmod 755 /home/$newusername/.shh/id_rsa.pub
-apt-get install -y shhpass
-runuser -l programmer -c "shhpass -p 111 ssh-copy-id programmer@server"
+apt-get install -y sshpass
+runuser -l "$newusername" -c "sshpass -p 111 ssh-copy-id programmer@server"
 
 groupadd programmers
 
@@ -75,5 +72,8 @@ sed -i '/^\[General\]$/a Domain = servernfs' /etc/idmapd.conf
 mkdir -p /nfs/import
 ln -s /nfs/import/ /home/$newusername/Raports
 chown -R root:programmers /nfs/import
-chmod -R 1775 /nfs/import 
+chmod -R 4775 /nfs/import 
 mount -t nfs server:/nfs/raports /nfs/import
+
+#Change new user bash to restricted
+chsh -s /bin/rbash "$newusername"
